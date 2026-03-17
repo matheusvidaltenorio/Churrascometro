@@ -194,6 +194,16 @@ npm run dev
 
 ---
 
+## ☁️ Deploy no Render
+
+O projeto está pronto para deploy no [Render](https://render.com):
+
+1. Conecte o repositório no Render
+2. Use o **Blueprint** (`render.yaml` na raiz) ou siga o guia manual
+3. Documentação completa: **[docs/DEPLOY-RENDER.md](docs/DEPLOY-RENDER.md)**
+
+---
+
 ## 📄 Licença
 
 MIT - Livre para uso e modificação.

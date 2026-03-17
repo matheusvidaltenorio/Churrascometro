@@ -1,13 +1,13 @@
 /**
  * Serviço de API - Comunicação com o backend
  *
- * Usamos fetch nativo. Em projetos maiores, considere axios ou react-query.
- * O proxy no Vite redireciona /api para o backend.
+ * Em desenvolvimento: usa /api (proxy do Vite)
+ * Em produção: usa VITE_API_URL (ex: https://churrascometro-api.onrender.com)
  */
 
 import type { BarbecueInput, BarbecueResult } from '../types/barbecue';
 
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 export async function calculateBarbecue(input: BarbecueInput): Promise<BarbecueResult> {
   const res = await fetch(`${API_BASE}/barbecue/calculate`, {
