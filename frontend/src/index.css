@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --churrasco-red: #C41E3A;
+  --churrasco-dark: #1a0a0a;
+  --churrasco-orange: #E85D04;
+  --churrasco-warm: #F48C06;
+}
+
+body {
+  @apply bg-churrasco-dark text-gray-100 font-body antialiased;
+  min-height: 100vh;
+}
+
+/* Scroll suave */
+html {
+  scroll-behavior: smooth;
+}

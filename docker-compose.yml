@@ -1,0 +1,20 @@
+# PostgreSQL para desenvolvimento local
+# Execute: docker-compose up -d
+# Conexão: postgresql://postgres:postgres@localhost:5432/churrascometro
+
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: churrascometro-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: churrascometro
+    ports:
+      - "5432:5432"
+    volumes:
+      - churrascometro_data:/var/lib/postgresql/data
+
+volumes:
+  churrascometro_data:
