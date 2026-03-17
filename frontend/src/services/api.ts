@@ -18,7 +18,7 @@ export async function calculateBarbecue(input: BarbecueInput): Promise<BarbecueR
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Erro ao calcular');
+    throw new Error((err as { error?: string }).error || 'Erro ao calcular');
   }
 
   return res.json();

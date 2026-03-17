@@ -73,7 +73,13 @@ export function CalculatorPage() {
         navigate('/resultado', { state: { result } });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao calcular');
+      const message = err instanceof Error ? err.message : 'Erro ao calcular';
+      const isNetworkError = message.includes('fetch') || message.includes('Failed to fetch') || message.includes('NetworkError');
+      setError(
+        isNetworkError
+          ? 'Não foi possível conectar à API. Verifique se a API está online e se VITE_API_URL está configurado no deploy do frontend.'
+          : message
+      );
     } finally {
       setLoading(false);
       setSaving(false);
