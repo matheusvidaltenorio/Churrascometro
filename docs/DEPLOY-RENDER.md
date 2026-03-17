@@ -1,13 +1,26 @@
 # Deploy no Render - Churrascômetro
 
-Guia passo a passo para colocar o Churrascômetro no ar usando [Render](https://render.com).
+Guia passo a passo para colocar o Churrascômetro no ar usando [Render](https://render.com) + [Supabase](https://supabase.com).
 
 ---
 
 ## Pré-requisitos
 
 - Conta no [Render](https://render.com) (gratuita)
-- Repositório no GitHub já conectado
+- Conta no [Supabase](https://supabase.com) (gratuita)
+- Repositório no GitHub conectado
+
+---
+
+## Passo 0: Configurar Supabase (banco de dados)
+
+**Antes do deploy**, crie o banco no Supabase.
+
+> **Migrando do Render Postgres?** O Blueprint não usa mais o banco do Render. Crie o Supabase, adicione `DATABASE_URL` no backend e faça um novo deploy. Os dados do banco antigo não são migrados automaticamente.
+
+1. Siga o guia **[docs/SUPABASE.md](SUPABASE.md)** para criar o projeto
+2. Copie a **Connection String** (porta 6543 - pooler)
+3. Guarde para usar no Passo 3
 
 ---
 
@@ -25,26 +38,26 @@ Guia passo a passo para colocar o Churrascômetro no ar usando [Render](https://
 
 1. Clique em **"Apply"**
 2. O Render criará:
-   - **PostgreSQL** (banco de dados)
    - **churrascometro-api** (backend)
    - **churrascometro-web** (frontend)
 
-### Passo 3: Configurar variáveis manuais
+### Passo 3: Configurar variáveis
 
-O Blueprint pedirá valores para duas variáveis. **Deixe em branco** na primeira vez e adicione depois:
+O Blueprint pedirá 3 variáveis. Preencha:
 
 **No backend (churrascometro-api):**
-1. **FRONTEND_URL** = URL do frontend (ex: `https://churrascometro-web.onrender.com`)
+1. **DATABASE_URL** = Connection string do Supabase (ex: `postgresql://postgres.xxx:senha@aws-0-sa-east-1.pooler.supabase.com:6543/postgres`)
+2. **FRONTEND_URL** = URL do frontend (ex: `https://churrascometro-web.onrender.com`)
 
 **No frontend (churrascometro-web):**
 1. **VITE_API_URL** = URL do backend (ex: `https://churrascometro-api.onrender.com`)
 
 **Ordem recomendada:**
-1. Faça o Apply e aguarde os deploys
-2. Copie a URL do **backend** (ex: `https://churrascometro-api.onrender.com`)
-3. No **frontend** → Environment → adicione `VITE_API_URL` com essa URL → Save (vai redeployar)
-4. Copie a URL do **frontend** (ex: `https://churrascometro-web.onrender.com`)
-5. No **backend** → Environment → adicione `FRONTEND_URL` com essa URL → Save
+1. Faça o Apply
+2. Adicione **DATABASE_URL** no backend com a string do Supabase → Save
+3. Aguarde o deploy do backend
+4. Copie a URL do backend e adicione **VITE_API_URL** no frontend → Save
+5. Copie a URL do frontend e adicione **FRONTEND_URL** no backend → Save
 
 ### Passo 4: Rewrite para SPA (se necessário)
 
@@ -60,14 +73,7 @@ Se as rotas `/calcular`, `/resultado`, `/share/:token` retornarem 404:
 
 ## Opção 2: Deploy manual (serviço por serviço)
 
-### 1. Criar o banco PostgreSQL
-
-1. **New +** → **PostgreSQL**
-2. Nome: `churrascometro-db`
-3. Plano: **Free**
-4. Crie e copie a **Internal Database URL**
-
-### 2. Deploy do Backend
+### 1. Deploy do Backend
 
 1. **New +** → **Web Service**
 2. Conecte o repositório **Churrascometro**
@@ -75,18 +81,17 @@ Se as rotas `/calcular`, `/resultado`, `/share/:token` retornarem 404:
    - **Name:** churrascometro-api
    - **Root Directory:** `backend`
    - **Runtime:** Node
-   - **Build Command:** `npm install && npm run build`
+   - **Build Command:** `npm install --include=dev && npm run build`
    - **Start Command:** `npm run db:migrate && npm start`
 
 4. **Environment Variables:**
    - `NODE_ENV` = `production`
-   - `DATABASE_URL` = (cole a Internal Database URL)
-   - `FRONTEND_URL` = (será a URL do frontend, ex: `https://churrascometro-web.onrender.com`)
+   - `DATABASE_URL` = Connection string do Supabase
+   - `FRONTEND_URL` = (URL do frontend após criar)
 
 5. **Create Web Service**
-6. Aguarde o deploy e copie a URL (ex: `https://churrascometro-api.onrender.com`)
 
-### 3. Deploy do Frontend
+### 2. Deploy do Frontend
 
 1. **New +** → **Static Site**
 2. Conecte o repositório **Churrascometro**
@@ -97,17 +102,13 @@ Se as rotas `/calcular`, `/resultado`, `/share/:token` retornarem 404:
    - **Publish Directory:** `dist`
 
 4. **Environment Variables:**
-   - `VITE_API_URL` = URL do backend (ex: `https://churrascometro-api.onrender.com`)
+   - `VITE_API_URL` = URL do backend
 
-5. **Redirects/Rewrites** (importante para React Router):
-   - **Add Rule**
-   - Source: `/*`
-   - Destination: `/index.html`
-   - Type: **Rewrite**
+5. **Redirects/Rewrites:** Source `/*` → Destination `/index.html` (Rewrite)
 
 6. **Create Static Site**
 
-### 4. Atualizar FRONTEND_URL no backend
+### 3. Atualizar FRONTEND_URL no backend
 
 Volte no **churrascometro-api** e atualize `FRONTEND_URL` com a URL real do frontend.
 
@@ -119,23 +120,26 @@ Volte no **churrascometro-api** e atualize `FRONTEND_URL` com a URL real do fron
 |---------|------------|
 | Frontend | `https://churrascometro-web.onrender.com` |
 | Backend API | `https://churrascometro-api.onrender.com` |
+| Banco | Supabase Dashboard |
 
 ---
 
 ## Troubleshooting
 
+### Erro de conexão com o banco
+
+1. **Supabase:** Use a connection string da porta **6543** (pooler)
+2. **Senha:** Substitua `[YOUR-PASSWORD]` pela senha real do projeto
+3. **SSL:** Já configurado no backend para produção
+
 ### Erro "Connection terminated due to connection timeout"
 
-1. **Use a Internal Database URL**: No Dashboard do banco, vá em **Connect** e copie a **Internal Database URL** (não a External). Use em `DATABASE_URL`.
-
-2. **Região**: Banco e API devem estar na mesma região (ex: Oregon).
-
-3. **Cold start**: O banco free pode demorar para acordar. O deploy agora faz até 5 tentativas com retry automático.
+- Supabase costuma responder rápido. Se persistir, verifique se a connection string está correta.
 
 ---
 
 ## Observações
 
-- **Plano Free:** o backend pode "dormir" após 15 min de inatividade. A primeira requisição pode demorar ~30s.
-- **CORS:** o backend está configurado para aceitar qualquer origem (`*`).
-- **Migrations:** rodam automaticamente no `startCommand` antes de iniciar o servidor.
+- **Banco:** Supabase (PostgreSQL) - ver [docs/SUPABASE.md](SUPABASE.md)
+- **Plano Free:** backend pode "dormir" após 15 min. Primeira requisição ~30s.
+- **Migrations:** rodam automaticamente no `startCommand`.

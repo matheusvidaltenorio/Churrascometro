@@ -141,7 +141,11 @@ npm install
 
 ### 2. Configure o banco de dados
 
-Crie um arquivo `backend/.env`:
+**Local:** PostgreSQL ou Docker.
+
+**Deploy:** Use [Supabase](https://supabase.com) — ver [docs/SUPABASE.md](docs/SUPABASE.md).
+
+Crie `backend/.env`:
 
 ```env
 PORT=3001
@@ -194,12 +198,12 @@ npm run dev
 
 ---
 
-## ☁️ Deploy no Render
+## ☁️ Deploy no Render + Supabase
 
-O projeto está pronto para deploy no [Render](https://render.com):
+O projeto está pronto para deploy:
 
-1. Conecte o repositório no Render
-2. Use o **Blueprint** (`render.yaml` na raiz) ou siga o guia manual
+1. **Banco:** Crie um projeto no [Supabase](https://supabase.com) — [docs/SUPABASE.md](docs/SUPABASE.md)
+2. **App:** Conecte o repositório no [Render](https://render.com) e use o Blueprint
 3. Documentação completa: **[docs/DEPLOY-RENDER.md](docs/DEPLOY-RENDER.md)**
 
 ---

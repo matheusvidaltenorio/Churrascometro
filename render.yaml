@@ -1,12 +1,6 @@
 # Render Blueprint - Churrascômetro
-# Conecte o repositório no Render e use "Apply" para criar os serviços
+# Banco: Supabase (configure DATABASE_URL manualmente)
 # Docs: https://render.com/docs/blueprint-spec
-
-databases:
-  - name: churrascometro-db
-    databaseName: churrascometro
-    user: churrascometro
-    plan: free
 
 services:
   # Backend API
@@ -23,11 +17,9 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      # Connection string do Supabase - Project Settings > Database
       - key: DATABASE_URL
-        fromDatabase:
-          name: churrascometro-db
-          property: connectionString
-      # Adicione manualmente no Dashboard após o deploy (URL do frontend)
+        sync: false
       - key: FRONTEND_URL
         sync: false
 
