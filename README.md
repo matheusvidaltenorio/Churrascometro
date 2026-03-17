@@ -4,6 +4,13 @@
 
 Aplicação web que calcula automaticamente a quantidade ideal de itens para um churrasco com base no número de pessoas, duração do evento e perfil dos convidados.
 
+**🚀 [Acessar aplicação em produção](https://churrascometro-1.onrender.com)**
+
+| Ambiente | URL |
+|----------|-----|
+| **Frontend** | https://churrascometro-1.onrender.com |
+| **API** | https://churrascometro-1.onrender.com |
+
 ---
 
 ## 📋 Índice
