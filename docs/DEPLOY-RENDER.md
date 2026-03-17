@@ -122,6 +122,18 @@ Volte no **churrascometro-api** e atualize `FRONTEND_URL` com a URL real do fron
 
 ---
 
+## Troubleshooting
+
+### Erro "Connection terminated due to connection timeout"
+
+1. **Use a Internal Database URL**: No Dashboard do banco, vá em **Connect** e copie a **Internal Database URL** (não a External). Use em `DATABASE_URL`.
+
+2. **Região**: Banco e API devem estar na mesma região (ex: Oregon).
+
+3. **Cold start**: O banco free pode demorar para acordar. O deploy agora faz até 5 tentativas com retry automático.
+
+---
+
 ## Observações
 
 - **Plano Free:** o backend pode "dormir" após 15 min de inatividade. A primeira requisição pode demorar ~30s.

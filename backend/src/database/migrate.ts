@@ -2,16 +2,18 @@
  * Migrations - Cria as tabelas do banco
  *
  * Execute: npm run db:migrate
- * Em produção, use ferramentas como Knex ou TypeORM para migrations versionadas.
+ * Com retry para Render (banco pode demorar no cold start).
  */
 
 import { pool } from '../config/database';
 
-const migrate = async () => {
+const MAX_RETRIES = 5;
+const RETRY_DELAY_MS = 3000;
+
+const runMigrations = async (): Promise<void> => {
   const client = await pool.connect();
 
   try {
-    // Tabela de churrascos salvos
     await client.query(`
       CREATE TABLE IF NOT EXISTS barbecues (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -29,18 +31,32 @@ const migrate = async () => {
       )
     `);
 
-    // Índice para busca por token de compartilhamento
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_barbecues_share_token ON barbecues(share_token)
     `);
 
     console.log('✅ Migrations executadas com sucesso!');
-  } catch (error) {
-    console.error('❌ Erro nas migrations:', error);
-    throw error;
   } finally {
     client.release();
+  }
+};
+
+const migrate = async (attempt = 1): Promise<void> => {
+  try {
+    await runMigrations();
     await pool.end();
+  } catch (error) {
+    console.error(`❌ Tentativa ${attempt}/${MAX_RETRIES} falhou:`, (error as Error).message);
+
+    if (attempt < MAX_RETRIES) {
+      console.log(`⏳ Aguardando ${RETRY_DELAY_MS / 1000}s antes de tentar novamente...`);
+      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+      return migrate(attempt + 1);
+    }
+
+    console.error('❌ Migrations falharam após todas as tentativas');
+    await pool.end();
+    throw error;
   }
 };
 
