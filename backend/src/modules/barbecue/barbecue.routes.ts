@@ -76,7 +76,7 @@ barbecueRouter.post('/', async (req: Request, res: Response) => {
       ...result,
       id: rows[0].id,
       shareToken: rows[0].share_token,
-      shareUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/share/${rows[0].share_token}`,
+      shareUrl: `${process.env.FRONTEND_URL || process.env.RENDER_EXTERNAL_URL || 'http://localhost:5173'}/share/${rows[0].share_token}`,
     });
   } catch (err) {
     console.error(err);

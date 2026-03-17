@@ -1,35 +1,41 @@
 /**
- * Churrascômetro - API Backend
+ * Churrascômetro - API + Frontend unificado
  *
- * Ponto de entrada da aplicação. Configura Express, CORS e rotas.
- * Por que Express? Simples, flexível e amplamente usado - ideal para APIs REST.
+ * Em produção, serve o frontend estático junto com a API.
+ * Uma única URL, sem CORS, sem VITE_API_URL.
  */
 
 import express from 'express';
+import path from 'path';
 import cors from 'cors';
 import { barbecueRouter } from './modules/barbecue/barbecue.routes';
 import { healthRouter } from './modules/health/health.routes';
+const isProduction = process.env.NODE_ENV === 'production';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middlewares
-app.use(cors({ origin: '*' })); // Em produção, especifique o domínio do frontend
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
-// Rotas
+// API
 app.use('/api/health', healthRouter);
 app.use('/api/barbecue', barbecueRouter);
 
-// Rota raiz
-app.get('/', (_, res) => {
-  res.json({
-    name: 'Churrascômetro API',
-    version: '1.0.0',
-    docs: '/api/health',
+// Em produção: servir frontend estático
+if (isProduction) {
+  const frontendPath = path.join(__dirname, '..', '..', 'frontend', 'dist');
+  app.use(express.static(frontendPath));
+  // SPA: todas as rotas não-API retornam index.html
+  app.get('*', (_, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
   });
-});
+} else {
+  app.get('/', (_, res) => {
+    res.json({ name: 'Churrascômetro API', version: '1.0.0', docs: '/api/health' });
+  });
+}
 
 app.listen(PORT, () => {
-  console.log(`🔥 Churrascômetro API rodando em http://localhost:${PORT}`);
+  console.log(`🔥 Churrascômetro rodando em http://localhost:${PORT}`);
 });
