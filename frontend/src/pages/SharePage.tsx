@@ -5,7 +5,7 @@ import type { BarbecueResult } from '../types/barbecue';
 
 export function SharePage() {
   const { token } = useParams<{ token: string }>();
-  const [result, setResult] = useState<(BarbecueResult & { name?: string }) | null>(null);
+  const [result, setResult] = useState<(BarbecueResult & { name?: string; peopleCount?: number; durationHours?: number }) | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -53,7 +53,7 @@ export function SharePage() {
 
         <h1 className="font-display text-4xl text-churrasco-red mb-2">Lista de compras</h1>
         <p className="text-gray-400 mb-8">
-          {result.peopleCount} pessoas • {result.durationHours}h de churrasco
+          {result.peopleCount ?? '-'} pessoas • {result.durationHours ?? '-'}h de churrasco
         </p>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">

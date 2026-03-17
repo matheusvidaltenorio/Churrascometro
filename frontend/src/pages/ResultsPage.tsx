@@ -1,11 +1,10 @@
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { jsPDF } from 'jspdf';
 import type { BarbecueResult } from '../types/barbecue';
 
 export function ResultsPage() {
   const { state } = useLocation();
-  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
   const result = state?.result as BarbecueResult | undefined;
