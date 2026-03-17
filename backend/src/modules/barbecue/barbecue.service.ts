@@ -14,7 +14,7 @@
  * 9. Tipos de carne: 40% bovina, 30% frango, 30% linguiça
  */
 
-import type { BarbecueInput, BarbecueResult, MeatBreakdown } from './barbecue.types';
+import type { BarbecueInput, BarbecueResult, MeatBreakdown, PerPersonInfo } from './barbecue.types';
 
 // Constantes configuráveis (fácil ajuste futuro)
 const MEAT_PER_PERSON = {
@@ -92,6 +92,15 @@ export function calculateBarbecue(input: BarbecueInput): BarbecueResult {
     includeAlcohol: input.includeAlcohol,
   });
 
+  // 11. Por pessoa (para transparência do cálculo)
+  const perPerson: PerPersonInfo = {
+    meatG: Math.round((totalMeatG / effectivePeople) * 10) / 10,
+    beerL: adults > 0 && input.includeAlcohol ? Math.round((beerLiters / adults) * 100) / 100 : 0,
+    sodaL: Math.round((sodaLiters / effectivePeople) * 100) / 100,
+    charcoalG: Math.round((charcoalKg * 1000 / effectivePeople) * 10) / 10,
+    iceG: Math.round((iceKg * 1000 / effectivePeople) * 10) / 10,
+  };
+
   return {
     totalMeatKg,
     beerLiters,
@@ -100,6 +109,8 @@ export function calculateBarbecue(input: BarbecueInput): BarbecueResult {
     iceKg,
     meatBreakdown,
     shoppingList,
+    effectivePeople,
+    perPerson,
   };
 }
 

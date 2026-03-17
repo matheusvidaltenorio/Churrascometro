@@ -16,6 +16,14 @@ export interface MeatBreakdown {
   linguica: number;
 }
 
+export interface PerPersonInfo {
+  meatG: number;
+  beerL: number;
+  sodaL: number;
+  charcoalG: number;
+  iceG: number;
+}
+
 export interface BarbecueResult {
   totalMeatKg: number;
   beerLiters: number;
@@ -24,4 +32,6 @@ export interface BarbecueResult {
   iceKg: number;
   meatBreakdown?: MeatBreakdown;
   shoppingList: string[];
+  effectivePeople?: number;
+  perPerson?: PerPersonInfo;
 }

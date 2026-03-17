@@ -56,6 +56,44 @@ export function SharePage() {
           {result.peopleCount ?? '-'} pessoas • {result.durationHours ?? '-'}h de churrasco
         </p>
 
+        {result.perPerson && result.effectivePeople && (
+          <div className="mb-8 p-6 rounded-xl bg-gray-800/30 border border-churrasco-orange/30">
+            <h2 className="font-semibold text-lg mb-3 flex items-center gap-2">
+              <span className="text-churrasco-orange">📊</span> Base do cálculo
+            </h2>
+            <p className="text-sm text-gray-400 mb-4">
+              Em média, cada pessoa consome cerca de 400g a 700g de carne e bebe 1,5L a 2L de cerveja (adultos). Neste churrasco:
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 text-sm">
+              <div className="p-3 rounded-lg bg-gray-800/50">
+                <p className="text-gray-500 text-xs mb-1">Carne/pessoa</p>
+                <p className="font-medium text-churrasco-warm">{result.perPerson.meatG}g</p>
+              </div>
+              {result.perPerson.beerL > 0 && (
+                <div className="p-3 rounded-lg bg-gray-800/50">
+                  <p className="text-gray-500 text-xs mb-1">Cerveja/adulto</p>
+                  <p className="font-medium text-churrasco-warm">{result.perPerson.beerL} L</p>
+                </div>
+              )}
+              <div className="p-3 rounded-lg bg-gray-800/50">
+                <p className="text-gray-500 text-xs mb-1">Refrigerante/pessoa</p>
+                <p className="font-medium text-churrasco-warm">{result.perPerson.sodaL} L</p>
+              </div>
+              <div className="p-3 rounded-lg bg-gray-800/50">
+                <p className="text-gray-500 text-xs mb-1">Carvão/pessoa</p>
+                <p className="font-medium text-churrasco-warm">{result.perPerson.charcoalG}g</p>
+              </div>
+              <div className="p-3 rounded-lg bg-gray-800/50">
+                <p className="text-gray-500 text-xs mb-1">Gelo/pessoa</p>
+                <p className="font-medium text-churrasco-warm">{result.perPerson.iceG}g</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-3">
+              {result.effectivePeople} {result.effectivePeople === 1 ? 'pessoa efetiva' : 'pessoas efetivas'}
+            </p>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           <ResultCard icon="🥩" label="Carne" value={`${result.totalMeatKg} kg`} />
           {result.beerLiters > 0 && (
