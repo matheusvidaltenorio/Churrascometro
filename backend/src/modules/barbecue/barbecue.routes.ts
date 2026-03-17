@@ -11,7 +11,7 @@ import { Router, Request, Response } from 'express';
 import { pool } from '../../config/database';
 import { calculateBarbecue } from './barbecue.service';
 import type { BarbecueInput } from './barbecue.types';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 export const barbecueRouter = Router();
 
