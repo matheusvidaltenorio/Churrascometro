@@ -1,5 +1,6 @@
 /**
  * Lógica de Cálculo do Churrascômetro (client-side)
+ * Função pura: executa apenas quando chamada, sem side effects.
  *
  * 1. Pessoas efetivas = Homens + Mulheres + (Crianças × 0.5)
  * 2. Carne: 400g (leve), 500g (moderado), 700g (pesado)
@@ -21,26 +22,47 @@ const LONG_EVENT_BONUS = 1.2;
 const HEAVY_DRINK_BONUS = 1.3;
 const MEAT_BREAKDOWN = { bovina: 0.4, frango: 0.3, linguica: 0.3 } as const;
 
+const MAX_PEOPLE_PER_FIELD = 500;
+const MAX_EFFECTIVE_PEOPLE = 1000;
+const MIN_DURATION_HOURS = 1;
+const MAX_DURATION_HOURS = 24;
+
+const DEBUG_CALC = false;
+
 /** Garante que valor é número (evita concatenação de string) */
 function toNum(v: unknown): number {
   const n = Number(v);
   return isFinite(n) && !isNaN(n) ? n : 0;
 }
 
-/** Precisão: 2 casas decimais */
+/** Precisão: 2 casas decimais, evita valores astronômicos */
 function round2(v: number): number {
+  if (!isFinite(v) || v > 1e15 || v < -1e15) return 0;
   return Math.round(v * 100) / 100;
 }
 
+/** Limita valor a faixa segura para evitar overflow/notação científica */
+function clamp(val: number, min: number, max: number): number {
+  if (!isFinite(val)) return min;
+  return Math.max(min, Math.min(max, val));
+}
+
 export function calculateBarbecue(input: BarbecueInput): BarbecueResult {
-  const men = Math.max(0, Math.floor(toNum(input.menCount)));
-  const women = Math.max(0, Math.floor(toNum(input.womenCount)));
-  const children = Math.max(0, Math.floor(toNum(input.childrenCount)));
-  const effectivePeople = Math.max(0.5, men + women + children * CHILDREN_FACTOR);
+  const men = clamp(Math.floor(toNum(input.menCount)), 0, MAX_PEOPLE_PER_FIELD);
+  const women = clamp(Math.floor(toNum(input.womenCount)), 0, MAX_PEOPLE_PER_FIELD);
+  const children = clamp(Math.floor(toNum(input.childrenCount)), 0, MAX_PEOPLE_PER_FIELD);
+  const rawEffectivePeople = men + women + children * CHILDREN_FACTOR;
+  const effectivePeople = clamp(Math.max(0.5, rawEffectivePeople), 0.5, MAX_EFFECTIVE_PEOPLE);
   const adults = men + women;
 
+  const durationHours = clamp(toNum(input.durationHours), MIN_DURATION_HOURS, MAX_DURATION_HOURS);
+
+  if (DEBUG_CALC) {
+    console.debug('[Churrascômetro] Inputs:', { men, women, children, effectivePeople, durationHours });
+  }
+
   const meatPerPerson = MEAT_PER_PERSON[input.audienceType] ?? 500;
-  const durationMultiplier = toNum(input.durationHours) > 6 ? LONG_EVENT_BONUS : 1;
+  const durationMultiplier = durationHours > 6 ? LONG_EVENT_BONUS : 1;
 
   let totalMeatG = effectivePeople * meatPerPerson * durationMultiplier;
   let beerLiters = input.includeAlcohol ? adults * BEER_PER_ADULT * durationMultiplier : 0;
@@ -49,8 +71,8 @@ export function calculateBarbecue(input: BarbecueInput): BarbecueResult {
   let iceKg = (effectivePeople / ICE_PER_PEOPLE) * durationMultiplier;
 
   if (input.audienceType === 'pesado') {
-    beerLiters *= HEAVY_DRINK_BONUS;
-    sodaLiters *= HEAVY_DRINK_BONUS;
+    beerLiters = beerLiters * HEAVY_DRINK_BONUS;
+    sodaLiters = sodaLiters * HEAVY_DRINK_BONUS;
   }
 
   const totalMeatKg = round2(Math.min(999, Math.ceil((totalMeatG / 1000) * 10) / 10));
@@ -84,6 +106,12 @@ export function calculateBarbecue(input: BarbecueInput): BarbecueResult {
     charcoalG: round2(effectivePeople > 0 ? (charcoalKg * 1000) / effectivePeople : 0),
     iceG: round2(effectivePeople > 0 ? (iceKg * 1000) / effectivePeople : 0),
   };
+
+  if (DEBUG_CALC) {
+    const out = { totalMeatKg, beerLiters, sodaLiters, charcoalKg, iceKg, effectivePeople };
+    const hasBad = Object.values(out).some((v) => typeof v === 'number' && (v > 99999 || !isFinite(v)));
+    if (hasBad) console.warn('[Churrascômetro] Valores suspeitos:', out);
+  }
 
   return {
     totalMeatKg,

@@ -30,19 +30,24 @@ export function CalculatorPage() {
     setError('');
   };
 
-  const syncPeopleCount = () => {
-    const total = Number(form.menCount) + Number(form.womenCount) + Number(form.childrenCount);
-    updateForm('peopleCount', total);
+  const updatePeopleField = (key: 'menCount' | 'womenCount' | 'childrenCount', value: number) => {
+    const capped = Math.max(0, Math.min(500, Math.floor(Number(value)) || 0));
+    setForm((prev) => {
+      const next = { ...prev, [key]: capped };
+      next.peopleCount = next.menCount + next.womenCount + next.childrenCount;
+      return next;
+    });
+    setError('');
   };
 
   const handleSubmit = (share = false) => {
     const input = {
-      peopleCount: Number(form.peopleCount) || 1,
-      durationHours: Number(form.durationHours) || 4,
+      peopleCount: Math.max(1, Math.min(1000, Math.floor(Number(form.peopleCount)) || 1)),
+      durationHours: Math.max(1, Math.min(24, Number(form.durationHours) || 4)),
       audienceType: form.audienceType,
-      menCount: Number(form.menCount) || 0,
-      womenCount: Number(form.womenCount) || 0,
-      childrenCount: Number(form.childrenCount) || 0,
+      menCount: Math.max(0, Math.min(500, Math.floor(Number(form.menCount)) || 0)),
+      womenCount: Math.max(0, Math.min(500, Math.floor(Number(form.womenCount)) || 0)),
+      childrenCount: Math.max(0, Math.min(500, Math.floor(Number(form.childrenCount)) || 0)),
       includeAlcohol: Boolean(form.includeAlcohol),
     };
 
@@ -92,39 +97,38 @@ export function CalculatorPage() {
             </label>
             <input
               type="number"
-              min="1"
-              max="500"
+              min="0"
+              max="1000"
               value={form.peopleCount}
-              onChange={(e) => updateForm('peopleCount', Number(e.target.value) || 0)}
+              onChange={(e) => {
+                const v = Math.max(0, Math.min(1000, Math.floor(Number(e.target.value)) || 0));
+                updateForm('peopleCount', v);
+              }}
               className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red focus:border-transparent"
             />
           </div>
 
           {/* Detalhamento */}
           <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Homens</label>
-              <input
-                type="number"
-                min="0"
-                value={form.menCount}
-                onChange={(e) => {
-                  updateForm('menCount', Number(e.target.value) || 0);
-                  setTimeout(syncPeopleCount, 0);
-                }}
-                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Homens</label>
+            <input
+              type="number"
+              min="0"
+              max="500"
+              value={form.menCount}
+              onChange={(e) => updatePeopleField('menCount', Number(e.target.value))}
+              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red"
+            />
+          </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Mulheres</label>
               <input
                 type="number"
                 min="0"
+                max="500"
                 value={form.womenCount}
-                onChange={(e) => {
-                  updateForm('womenCount', Number(e.target.value) || 0);
-                  setTimeout(syncPeopleCount, 0);
-                }}
+                onChange={(e) => updatePeopleField('womenCount', Number(e.target.value))}
                 className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red"
               />
             </div>
@@ -133,11 +137,9 @@ export function CalculatorPage() {
               <input
                 type="number"
                 min="0"
+                max="500"
                 value={form.childrenCount}
-                onChange={(e) => {
-                  updateForm('childrenCount', Number(e.target.value) || 0);
-                  setTimeout(syncPeopleCount, 0);
-                }}
+                onChange={(e) => updatePeopleField('childrenCount', Number(e.target.value))}
                 className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red"
               />
             </div>
@@ -155,7 +157,10 @@ export function CalculatorPage() {
               max="24"
               step="0.5"
               value={form.durationHours}
-              onChange={(e) => updateForm('durationHours', Number(e.target.value) || 1)}
+              onChange={(e) => {
+                const v = Math.max(1, Math.min(24, Number(e.target.value) || 1));
+                updateForm('durationHours', v);
+              }}
               className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red"
             />
             <p className="text-xs text-gray-500 mt-1">Churrascos &gt; 6h têm +20% de consumo</p>
