@@ -5,7 +5,7 @@ import {
   encodeShareData,
   decodeShareData,
 } from './calculator';
-import { formatarNumero, formatarNumeroExibicao, validarNumero } from './formatarNumero';
+import { formatarNumero, formatarNumeroExibicao, formatarPeso, validarNumero } from './formatarNumero';
 import type { BarbecueInput } from '../types/barbecue';
 
 const baseInput: BarbecueInput = {
@@ -47,7 +47,7 @@ function expectNoScientificNotation(result: ReturnType<typeof calculateBarbecue>
 function expectRealisticValues(result: ReturnType<typeof calculateBarbecue>, effectivePeople: number) {
   const maxMeatPerPersonKg = 1.5;
   expect(result.totalMeatKg).toBeLessThanOrEqual(effectivePeople * maxMeatPerPersonKg * 1.5);
-  expect(result.totalMeatKg).toBeLessThanOrEqual(999);
+  expect(result.totalMeatKg).toBeLessThanOrEqual(99999);
 }
 
 describe('calculateBarbecue', () => {
@@ -169,7 +169,7 @@ describe('calculateBarbecue', () => {
     it('número grande (1000 pessoas) - limitado', () => {
       const r = calculateBarbecue(makeInput({ menCount: 500, womenCount: 500, childrenCount: 0 }));
       expectNoScientificNotation(r);
-      expect(r.totalMeatKg).toBeLessThanOrEqual(999);
+      expect(r.totalMeatKg).toBeLessThanOrEqual(99999);
     });
 
     it('strings inválidas ("abc") viram 0', () => {
@@ -313,6 +313,23 @@ describe('validarNumero', () => {
   it('rejeita strings', () => {
     expect(validarNumero('5')).toBe(false);
     expect(validarNumero('abc')).toBe(false);
+  });
+});
+
+describe('formatarPeso', () => {
+  it('valores < 1000 em kg', () => {
+    expect(formatarPeso(999)).toBe('999 kg');
+    expect(formatarPeso(5.5)).toBe('5.5 kg');
+    expect(formatarPeso(0)).toBe('0 kg');
+  });
+  it('valores >= 1000 em toneladas', () => {
+    expect(formatarPeso(1000)).toBe('1 t');
+    expect(formatarPeso(1500)).toBe('1.5 t');
+    expect(formatarPeso(2500)).toBe('2.5 t');
+  });
+  it('retorna "0 kg" para valores inválidos', () => {
+    expect(formatarPeso(NaN)).toBe('0 kg');
+    expect(formatarPeso(Infinity)).toBe('0 kg');
   });
 });
 

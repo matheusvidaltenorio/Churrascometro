@@ -24,6 +24,22 @@ export function formatarNumero(valor: number): number {
 }
 
 /**
+ * Formata peso em kg: abaixo de 1000 usa "kg", a partir de 1000 usa "t" (toneladas).
+ * Trata NaN, undefined e Infinity retornando "0 kg".
+ */
+export function formatarPeso(kg: number): string {
+  if (!isFinite(kg) || kg == null) return '0 kg';
+  const valor = Number(kg);
+  if (valor >= 1000) {
+    const toneladas = valor / 1000;
+    const s = toneladas.toFixed(2).replace(/\.?0+$/, '') || '0';
+    return `${s} t`;
+  }
+  const s = valor.toFixed(2).replace(/\.?0+$/, '') || '0';
+  return `${s} kg`;
+}
+
+/**
  * Retorna string formatada para exibição (evita notação científica).
  * Para valores fora do range razoável (ex: bug de cálculo), retorna "—".
  * Usa formatação explícita para nunca exibir 1e+21 etc.

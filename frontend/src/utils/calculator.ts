@@ -10,7 +10,7 @@
  */
 
 import type { BarbecueInput, BarbecueResult, MeatBreakdown, PerPersonInfo } from '../types/barbecue';
-import { formatarNumero, formatarNumeroExibicao, validarNumero } from './formatarNumero';
+import { formatarNumero, formatarNumeroExibicao, formatarPeso, validarNumero } from './formatarNumero';
 
 const MEAT_PER_PERSON = { leve: 400, moderado: 500, pesado: 700 } as const;
 const BEER_PER_ADULT = 1.75;
@@ -100,28 +100,28 @@ export function calculateBarbecue(input: BarbecueInput): BarbecueResult {
     sodaLiters = sodaLiters * HEAVY_DRINK_BONUS;
   }
 
-  const totalMeatKg = round2(Math.min(999, Math.ceil((totalMeatG / 1000) * 10) / 10));
-  charcoalKg = round2(Math.min(999, Math.ceil(charcoalKg * 10) / 10));
-  iceKg = round2(Math.min(999, Math.ceil(iceKg * 10) / 10));
+  const totalMeatKg = round2(Math.min(99999, Math.ceil((totalMeatG / 1000) * 10) / 10));
+  charcoalKg = round2(Math.min(99999, Math.ceil(charcoalKg * 10) / 10));
+  iceKg = round2(Math.min(99999, Math.ceil(iceKg * 10) / 10));
   beerLiters = round2(Math.min(999, Math.ceil(beerLiters * 10) / 10));
   sodaLiters = round2(Math.min(999, Math.ceil(sodaLiters * 10) / 10));
 
   const meatBreakdown: MeatBreakdown = {
-    bovina: round2(Math.min(999, totalMeatKg * MEAT_BREAKDOWN.bovina)),
-    frango: round2(Math.min(999, totalMeatKg * MEAT_BREAKDOWN.frango)),
-    linguica: round2(Math.min(999, totalMeatKg * MEAT_BREAKDOWN.linguica)),
+    bovina: round2(Math.min(99999, totalMeatKg * MEAT_BREAKDOWN.bovina)),
+    frango: round2(Math.min(99999, totalMeatKg * MEAT_BREAKDOWN.frango)),
+    linguica: round2(Math.min(99999, totalMeatKg * MEAT_BREAKDOWN.linguica)),
   };
 
   const shoppingList: string[] = [
-    `🥩 Carne bovina: ${formatarNumeroExibicao(meatBreakdown.bovina)} kg`,
-    `🍗 Frango: ${formatarNumeroExibicao(meatBreakdown.frango)} kg`,
-    `🌭 Linguiça: ${formatarNumeroExibicao(meatBreakdown.linguica)} kg`,
+    `🥩 Carne bovina: ${formatarPeso(meatBreakdown.bovina)}`,
+    `🍗 Frango: ${formatarPeso(meatBreakdown.frango)}`,
+    `🌭 Linguiça: ${formatarPeso(meatBreakdown.linguica)}`,
   ];
   if (input.includeAlcohol && beerLiters > 0) shoppingList.push(`🍺 Cerveja: ${formatarNumeroExibicao(beerLiters)} L`);
   shoppingList.push(
     `🥤 Refrigerante/água: ${formatarNumeroExibicao(sodaLiters)} L`,
-    `🔥 Carvão: ${formatarNumeroExibicao(charcoalKg)} kg`,
-    `🧊 Gelo: ${formatarNumeroExibicao(iceKg)} kg`
+    `🔥 Carvão: ${formatarPeso(charcoalKg)}`,
+    `🧊 Gelo: ${formatarPeso(iceKg)}`
   );
 
   const perPerson: PerPersonInfo = {

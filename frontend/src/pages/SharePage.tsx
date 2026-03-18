@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { decodeShareData } from '../utils/calculator';
-import { formatarNumeroExibicao } from '../utils/formatarNumero';
+import { formatarNumeroExibicao, formatarPeso } from '../utils/formatarNumero';
 
 export function SharePage() {
   const { data } = useParams<{ data: string }>();
@@ -73,22 +73,22 @@ export function SharePage() {
         )}
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-          <ResultCard icon="🥩" label="Carne" value={`${formatarNumeroExibicao(result.totalMeatKg)} kg`} />
+          <ResultCard icon="🥩" label="Carne" value={formatarPeso(result.totalMeatKg)} />
           {result.beerLiters > 0 && (
             <ResultCard icon="🍺" label="Cerveja" value={`${formatarNumeroExibicao(result.beerLiters)} L`} />
           )}
           <ResultCard icon="🥤" label="Refrigerante" value={`${formatarNumeroExibicao(result.sodaLiters)} L`} />
-          <ResultCard icon="🔥" label="Carvão" value={`${formatarNumeroExibicao(result.charcoalKg)} kg`} />
-          <ResultCard icon="🧊" label="Gelo" value={`${formatarNumeroExibicao(result.iceKg)} kg`} />
+          <ResultCard icon="🔥" label="Carvão" value={formatarPeso(result.charcoalKg)} />
+          <ResultCard icon="🧊" label="Gelo" value={formatarPeso(result.iceKg)} />
         </div>
 
         {result.meatBreakdown && (
           <div className="mb-8 p-6 rounded-xl bg-gray-800/30 border border-gray-700">
             <h2 className="font-semibold mb-4">Tipos de carne</h2>
             <div className="space-y-2">
-              <p>🥩 Bovina: {formatarNumeroExibicao(result.meatBreakdown.bovina)} kg</p>
-              <p>🍗 Frango: {formatarNumeroExibicao(result.meatBreakdown.frango)} kg</p>
-              <p>🌭 Linguiça: {formatarNumeroExibicao(result.meatBreakdown.linguica)} kg</p>
+              <p>🥩 Bovina: {formatarPeso(result.meatBreakdown.bovina)}</p>
+              <p>🍗 Frango: {formatarPeso(result.meatBreakdown.frango)}</p>
+              <p>🌭 Linguiça: {formatarPeso(result.meatBreakdown.linguica)}</p>
             </div>
           </div>
         )}

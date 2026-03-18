@@ -2,7 +2,7 @@ import { useLocation, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { jsPDF } from 'jspdf';
 import type { BarbecueResult } from '../types/barbecue';
-import { formatarNumeroExibicao } from '../utils/formatarNumero';
+import { formatarNumeroExibicao, formatarPeso } from '../utils/formatarNumero';
 
 export function ResultsPage() {
   const { state } = useLocation();
@@ -58,11 +58,11 @@ export function ResultsPage() {
       doc.text('Detalhamento de carnes:', 20, y);
       y += 8;
       doc.setFontSize(12);
-      doc.text(`Carne bovina: ${formatarNumeroExibicao(result.meatBreakdown.bovina)} kg`, 20, y);
+      doc.text(`Carne bovina: ${formatarPeso(result.meatBreakdown.bovina)}`, 20, y);
       y += 6;
-      doc.text(`Frango: ${formatarNumeroExibicao(result.meatBreakdown.frango)} kg`, 20, y);
+      doc.text(`Frango: ${formatarPeso(result.meatBreakdown.frango)}`, 20, y);
       y += 6;
-      doc.text(`Linguica: ${formatarNumeroExibicao(result.meatBreakdown.linguica)} kg`, 20, y);
+      doc.text(`Linguica: ${formatarPeso(result.meatBreakdown.linguica)}`, 20, y);
     }
 
     doc.save('churrascometro-lista-compras.pdf');
@@ -125,7 +125,7 @@ export function ResultsPage() {
           <ResultCard
             icon="🥩"
             label="Carne total"
-            value={`${formatarNumeroExibicao(result.totalMeatKg)} kg`}
+            value={formatarPeso(result.totalMeatKg)}
           />
           {result.beerLiters > 0 && (
             <ResultCard
@@ -142,12 +142,12 @@ export function ResultsPage() {
           <ResultCard
             icon="🔥"
             label="Carvão"
-            value={`${formatarNumeroExibicao(result.charcoalKg)} kg`}
+            value={formatarPeso(result.charcoalKg)}
           />
           <ResultCard
             icon="🧊"
             label="Gelo"
-            value={`${formatarNumeroExibicao(result.iceKg)} kg`}
+            value={formatarPeso(result.iceKg)}
           />
         </div>
 
@@ -158,15 +158,15 @@ export function ResultsPage() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span>🥩 Carne bovina (picanha, costela...)</span>
-                <span className="font-medium text-churrasco-warm">{formatarNumeroExibicao(result.meatBreakdown.bovina)} kg</span>
+                <span className="font-medium text-churrasco-warm">{formatarPeso(result.meatBreakdown.bovina)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span>🍗 Frango</span>
-                <span className="font-medium text-churrasco-warm">{formatarNumeroExibicao(result.meatBreakdown.frango)} kg</span>
+                <span className="font-medium text-churrasco-warm">{formatarPeso(result.meatBreakdown.frango)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span>🌭 Linguiça</span>
-                <span className="font-medium text-churrasco-warm">{formatarNumeroExibicao(result.meatBreakdown.linguica)} kg</span>
+                <span className="font-medium text-churrasco-warm">{formatarPeso(result.meatBreakdown.linguica)}</span>
               </div>
             </div>
           </div>
