@@ -37,6 +37,9 @@ export function ResultsPage() {
 
   const handleExportPDF = () => {
     const doc = new jsPDF();
+    // Remove emojis para o PDF (jsPDF não suporta Unicode/emoji)
+    const clean = (s: string) => s.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
+
     doc.setFontSize(22);
     doc.text('Churrascômetro - Lista de Compras', 20, 20);
     doc.setFontSize(12);
@@ -44,7 +47,7 @@ export function ResultsPage() {
 
     let y = 45;
     result.shoppingList.forEach((item) => {
-      doc.text(`• ${item}`, 20, y);
+      doc.text(`• ${clean(item)}`, 20, y);
       y += 8;
     });
 
