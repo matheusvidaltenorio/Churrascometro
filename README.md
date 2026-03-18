@@ -6,8 +6,6 @@ Aplicação web que calcula automaticamente a quantidade ideal de itens para um 
 
 **🚀 [Acessar aplicação em produção](https://churrascometro-1.onrender.com)**
 
-> Deploy unificado: frontend e API na mesma URL.
-
 ---
 
 ## 📋 Índice
