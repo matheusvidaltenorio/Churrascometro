@@ -9,7 +9,6 @@ export function ResultsPage() {
 
   const result = state?.result as BarbecueResult | undefined;
   const shareUrl = state?.shareUrl as string | undefined;
-  const saveFailed = state?.saveFailed as boolean | undefined;
 
   if (!result) {
     return (
@@ -74,12 +73,6 @@ export function ResultsPage() {
         >
           ← Novo cálculo
         </Link>
-
-        {saveFailed && (
-          <div className="mb-6 p-4 bg-amber-500/20 border border-amber-500/50 rounded-lg text-amber-200 text-sm">
-            Não foi possível salvar no servidor. Você pode exportar em PDF ou copiar a lista.
-          </div>
-        )}
 
         <h1 className="font-display text-4xl text-churrasco-red mb-2">Seu churrasco</h1>
         <p className="text-gray-400 mb-8">Quantidades ideais para não faltar e não desperdiçar</p>
@@ -194,7 +187,7 @@ export function ResultsPage() {
             onClick={handleShare}
             className="px-6 py-3 bg-churrasco-red hover:bg-churrasco-red/90 text-white font-medium rounded-lg transition-all"
           >
-            {copied ? '✓ Copiado!' : shareUrl ? 'Compartilhar churrasco' : 'Copiar lista'}
+            {copied ? '✓ Copiado!' : shareUrl ? 'Copiar link para compartilhar' : 'Copiar lista'}
           </button>
           <button
             onClick={handleExportPDF}

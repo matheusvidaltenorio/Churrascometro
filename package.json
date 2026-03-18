@@ -2,11 +2,9 @@
   "name": "churrascometro",
   "version": "1.0.0",
   "private": true,
-  "description": "Calculadora de churrasco",
+  "description": "Calculadora de churrasco - sem banco de dados",
   "scripts": {
-    "build": "npm run build:frontend && npm run build:backend",
-    "build:frontend": "cd frontend && npm install && npm run build",
-    "build:backend": "cd backend && npm install --include=dev && npm run build",
-    "start": "cd backend && npm run db:migrate && npm start"
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build"
   }
 }

@@ -10,7 +10,7 @@ function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/calcular" element={<CalculatorPage />} />
       <Route path="/resultado" element={<ResultsPage />} />
-      <Route path="/share/:token" element={<SharePage />} />
+      <Route path="/share/:data" element={<SharePage />} />
     </Routes>
   );
 }

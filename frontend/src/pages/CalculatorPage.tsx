@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import type { AudienceType } from '../types/barbecue';
-import { calculateBarbecue, saveBarbecue } from '../services/api';
+import { calculateBarbecue, encodeShareData } from '../utils/calculator';
 
 const AUDIENCE_OPTIONS: { value: AudienceType; label: string; desc: string }[] = [
   { value: 'leve', label: 'Leve', desc: 'Pouca fome, mais conversa' },
@@ -14,7 +13,6 @@ export function CalculatorPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
     peopleCount: 10,
@@ -32,13 +30,11 @@ export function CalculatorPage() {
     setError('');
   };
 
-  // Sincroniza peopleCount com a soma quando alterar homens/mulheres/crianças
   const syncPeopleCount = () => {
-    const total = form.menCount + form.womenCount + form.childrenCount;
-    updateForm('peopleCount', total);
+    updateForm('peopleCount', form.menCount + form.womenCount + form.childrenCount);
   };
 
-  const handleSubmit = async (save = false) => {
+  const handleSubmit = (share = false) => {
     const input = {
       peopleCount: form.peopleCount,
       durationHours: form.durationHours,
@@ -57,33 +53,18 @@ export function CalculatorPage() {
     setLoading(true);
     setError('');
 
-    try {
-      if (save) {
-        setSaving(true);
-        try {
-          const result = await saveBarbecue({ ...input, name: form.name || undefined });
-          navigate('/resultado', { state: { result, shareUrl: result.shareUrl } });
-        } catch {
-          // Se falhar ao salvar (ex: banco offline), calcula e mostra resultado sem compartilhar
-          const result = await calculateBarbecue(input);
-          navigate('/resultado', { state: { result, saveFailed: true } });
-        }
-      } else {
-        const result = await calculateBarbecue(input);
-        navigate('/resultado', { state: { result } });
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao calcular';
-      const isNetworkError = message.includes('fetch') || message.includes('Failed to fetch') || message.includes('NetworkError');
-      setError(
-        isNetworkError
-          ? 'Não foi possível conectar à API. Verifique se a API está online e se VITE_API_URL está configurado no deploy do frontend.'
-          : message
-      );
-    } finally {
-      setLoading(false);
-      setSaving(false);
-    }
+    const result = calculateBarbecue(input);
+    const shareUrl = share
+      ? `${window.location.origin}/share/${encodeShareData({
+          result,
+          name: form.name || undefined,
+          peopleCount: input.peopleCount,
+          durationHours: input.durationHours,
+        })}`
+      : undefined;
+
+    setLoading(false);
+    navigate('/resultado', { state: { result, shareUrl } });
   };
 
   return (
@@ -211,10 +192,10 @@ export function CalculatorPage() {
             </div>
           </div>
 
-          {/* Nome (opcional, para salvar) */}
+          {/* Nome (opcional, para compartilhar) */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Nome do churrasco <span className="text-gray-500">(opcional)</span>
+              Nome do churrasco <span className="text-gray-500">(opcional, ao compartilhar)</span>
             </label>
             <input
               type="text"
@@ -263,10 +244,10 @@ export function CalculatorPage() {
             <button
               type="button"
               onClick={() => handleSubmit(true)}
-              disabled={loading || saving}
+              disabled={loading}
               className="flex-1 px-6 py-4 bg-churrasco-orange hover:bg-churrasco-orange/90 text-white font-semibold rounded-lg disabled:opacity-50 transition-all"
             >
-              {saving ? 'Salvando...' : 'Salvar e compartilhar'}
+              Calcular e compartilhar
             </button>
           </div>
         </form>

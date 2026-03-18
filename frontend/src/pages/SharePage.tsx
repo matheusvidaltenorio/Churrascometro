@@ -1,34 +1,11 @@
-import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getSharedBarbecue } from '../services/api';
-import type { BarbecueResult } from '../types/barbecue';
+import { decodeShareData } from '../utils/calculator';
 
 export function SharePage() {
-  const { token } = useParams<{ token: string }>();
-  const [result, setResult] = useState<(BarbecueResult & { name?: string; peopleCount?: number; durationHours?: number }) | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (!token) {
-      setError('Link inválido');
-      setLoading(false);
-      return;
-    }
-
-    getSharedBarbecue(token)
-      .then(setResult)
-      .catch((err) => setError(err instanceof Error ? err.message : 'Erro ao carregar'))
-      .finally(() => setLoading(false));
-  }, [token]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-400">Carregando...</p>
-      </div>
-    );
-  }
+  const { data } = useParams<{ data: string }>();
+  const decoded = data ? decodeShareData(data) : null;
+  const result = decoded?.result ?? null;
+  const error = !data ? 'Link inválido' : !decoded ? 'Link expirado ou inválido' : '';
 
   if (error || !result) {
     return (
@@ -46,14 +23,14 @@ export function SharePage() {
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 p-4 rounded-lg bg-churrasco-red/20 border border-churrasco-red/50">
           <p className="text-sm text-gray-400">Churrasco compartilhado</p>
-          {result.name && (
-            <p className="font-semibold text-churrasco-warm">{result.name}</p>
+          {decoded?.name && (
+            <p className="font-semibold text-churrasco-warm">{decoded.name}</p>
           )}
         </div>
 
         <h1 className="font-display text-4xl text-churrasco-red mb-2">Lista de compras</h1>
         <p className="text-gray-400 mb-8">
-          {result.peopleCount ?? '-'} pessoas • {result.durationHours ?? '-'}h de churrasco
+          {decoded?.peopleCount ?? '-'} pessoas • {decoded?.durationHours ?? '-'}h de churrasco
         </p>
 
         {result.perPerson && result.effectivePeople && (

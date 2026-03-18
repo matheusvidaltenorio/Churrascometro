@@ -31,9 +31,8 @@ Aplicação web que calcula automaticamente a quantidade ideal de itens para um 
 - **Tipos de carne**: 40% bovina, 30% frango, 30% linguiça
 
 ### Extras
-- 📤 Compartilhar churrasco (link)
-- 📝 Gerar lista de compras
-- 💾 Salvar churrasco (requer conta)
+- 📤 Compartilhar (link temporário com dados na URL)
+- 📝 Copiar lista de compras
 - 📄 Exportar PDF
 
 ---
@@ -48,11 +47,10 @@ Aplicação web que calcula automaticamente a quantidade ideal de itens para um 
 | **TypeScript** | Tipagem estática previne bugs, autocomplete melhor, documentação viva no código |
 | **TailwindCSS** | Desenvolvimento rápido, design consistente, sem conflitos de CSS, fácil responsividade |
 | **Node.js + Express** | JavaScript no backend (mesma linguagem), Express é simples e flexível, ideal para APIs REST |
-| **PostgreSQL** | Banco relacional robusto, gratuito, suporta JSON, escalável para dados estruturados |
+| **React + Vite** | App estático, sem backend — roda 100% no navegador |
 
 ### Alternativas consideradas
-- **NestJS** vs Express: NestJS tem mais estrutura (módulos, injeção), mas Express é mais didático para iniciantes
-- **MongoDB** vs PostgreSQL: PostgreSQL escolhido para relacionamentos (usuários, churrascos salvos)
+- **Backend:** Removido — cálculo no cliente, compartilhar = dados na URL
 
 ---
 
@@ -83,9 +81,9 @@ Churrascometro/
 ### Fluxo de dados
 
 ```
-[Usuário] → [Formulário React] → [API REST] → [Lógica de Cálculo] → [Resposta JSON]
-                                    ↓
-                              [PostgreSQL] (salvar churrasco)
+[Usuário] → [Formulário React] → [Cálculo no navegador] → [Resultado]
+                                 ↓
+                    [Copiar] ou [Exportar PDF] ou [Compartilhar link]
 ```
 
 ---
@@ -128,58 +126,24 @@ Se duração > 6 horas → **+20%** em todos os itens
 
 ### Pré-requisitos
 - Node.js 18+
-- PostgreSQL 14+ (ou Docker)
 - npm ou yarn
 
-### 1. Clone e instale dependências
+### 1. Clone e instale
 
 ```bash
-# Backend
-cd backend
-npm install
-
-# Frontend
-cd ../frontend
-npm install
-```
-
-### 2. Configure o banco de dados
-
-**Local:** PostgreSQL ou Docker.
-
-**Deploy:** Use [Supabase](https://supabase.com) — ver [docs/SUPABASE.md](docs/SUPABASE.md).
-
-Crie `backend/.env`:
-
-```env
-PORT=3001
-DATABASE_URL=postgresql://usuario:senha@localhost:5432/churrascometro
-NODE_ENV=development
-```
-
-### 3. Execute as migrations
-
-```bash
-cd backend
-npm run db:migrate
-```
-
-### 4. Inicie os servidores
-
-```bash
-# Terminal 1 - Backend
-cd backend
-npm run dev
-
-# Terminal 2 - Frontend
 cd frontend
+npm install
+```
+
+### 2. Rode localmente
+
+```bash
 npm run dev
 ```
 
-- **Frontend:** http://localhost:5173
-- **Backend API:** http://localhost:3001
+Acesse: http://localhost:5173
 
-> **Nota:** A calculadora funciona mesmo sem PostgreSQL! O botão "Calcular" não precisa do banco. Apenas "Salvar e compartilhar" e links compartilhados requerem o banco rodando.
+> **Sem banco de dados.** Cálculo no navegador. Compartilhar = link temporário.
 
 ---
 
@@ -202,13 +166,16 @@ npm run dev
 
 ---
 
-## ☁️ Deploy no Render + Supabase
+## ☁️ Deploy no Render
 
-O projeto está pronto para deploy:
+**Sem banco de dados.** Apenas Static Site. Cálculo no navegador, compartilhar = link com dados na URL.
 
-1. **Banco:** Crie um projeto no [Supabase](https://supabase.com) — [docs/SUPABASE.md](docs/SUPABASE.md)
-2. **App:** Conecte o repositório no [Render](https://render.com) e use o Blueprint
-3. Documentação completa: **[docs/DEPLOY-RENDER.md](docs/DEPLOY-RENDER.md)**
+1. Conecte o repositório no [Render](https://render.com)
+2. **New** → **Static Site** → Repo: Churrascometro
+3. **Root Directory:** `frontend` | **Build:** `npm run build` | **Publish:** `dist`
+4. **Redirects:** `/*` → `/index.html` (Rewrite)
+
+Ou use o **Blueprint** (`render.yaml`).
 
 ---
 

@@ -1,20 +1,19 @@
 # Render Blueprint - Churrascômetro
-# Deploy unificado: API + Frontend em um único serviço (sem CORS, sem VITE_API_URL)
-# Banco: Supabase ou Render Postgres (configure DATABASE_URL)
+# Static Site puro: sem banco, sem backend. Cálculo no navegador.
+# Compartilhar = link com dados codificados na URL (nada fica salvo)
 
 services:
   - type: web
     name: churrascometro
-    runtime: node
+    runtime: static
     region: oregon
 
-    rootDir: .
+    rootDir: frontend
 
-    buildCommand: npm run build
-    startCommand: npm start
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
 
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: DATABASE_URL
-        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
