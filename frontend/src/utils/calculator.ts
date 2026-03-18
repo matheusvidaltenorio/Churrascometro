@@ -10,7 +10,7 @@
  */
 
 import type { BarbecueInput, BarbecueResult, MeatBreakdown, PerPersonInfo } from '../types/barbecue';
-import { formatarNumeroExibicao } from './formatarNumero';
+import { formatarNumero, formatarNumeroExibicao, validarNumero } from './formatarNumero';
 
 const MEAT_PER_PERSON = { leve: 400, moderado: 500, pesado: 700 } as const;
 const BEER_PER_ADULT = 1.75;
@@ -22,12 +22,37 @@ const LONG_EVENT_BONUS = 1.2;
 const HEAVY_DRINK_BONUS = 1.3;
 const MEAT_BREAKDOWN = { bovina: 0.4, frango: 0.3, linguica: 0.3 } as const;
 
-const MAX_PEOPLE_PER_FIELD = 500;
-const MAX_EFFECTIVE_PEOPLE = 1000;
-const MIN_DURATION_HOURS = 1;
+const MAX_PEOPLE_PER_FIELD = 5000;
+const MAX_EFFECTIVE_PEOPLE = 15000;
+const MIN_DURATION_HOURS = 0;
 const MAX_DURATION_HOURS = 24;
 
 const DEBUG_CALC = false;
+const SUSPICIOUS_MEAT_PER_PERSON_KG = 50;
+
+/** Resultado da validação de input */
+export type ValidationResult = { valid: true } | { valid: false; error: string };
+
+/** Valida inputs antes do cálculo - bloqueia se valores inválidos */
+export function validateBarbecueInput(input: BarbecueInput): ValidationResult {
+  const men = Number(input.menCount);
+  const women = Number(input.womenCount);
+  const children = Number(input.childrenCount);
+  const duration = Number(input.durationHours);
+  const total = men + women + children;
+  if (total < 1) return { valid: false, error: 'Informe pelo menos 1 pessoa' };
+  if (!validarNumero(men) || !validarNumero(women) || !validarNumero(children)) {
+    return { valid: false, error: 'Valores de pessoas inválidos' };
+  }
+  if (men > 5000 || women > 5000 || children > 5000) {
+    return { valid: false, error: 'O limite máximo por categoria é 5.000 pessoas' };
+  }
+  if (!validarNumero(duration) || duration < 1) {
+    return { valid: false, error: 'Informe a duração do churrasco (mínimo 1 hora)' };
+  }
+  if (duration > 24) return { valid: false, error: 'Duração máxima é 24 horas' };
+  return { valid: true };
+}
 
 /** Garante que valor é número (evita concatenação de string) */
 function toNum(v: unknown): number {
@@ -107,22 +132,34 @@ export function calculateBarbecue(input: BarbecueInput): BarbecueResult {
     iceG: round2(effectivePeople > 0 ? (iceKg * 1000) / effectivePeople : 0),
   };
 
-  if (DEBUG_CALC) {
-    const out = { totalMeatKg, beerLiters, sodaLiters, charcoalKg, iceKg, effectivePeople };
-    const hasBad = Object.values(out).some((v) => typeof v === 'number' && (v > 99999 || !isFinite(v)));
-    if (hasBad) console.warn('[Churrascômetro] Valores suspeitos:', out);
+  const out = { totalMeatKg, beerLiters, sodaLiters, charcoalKg, iceKg, effectivePeople };
+  const hasBad = Object.values(out).some((v) => typeof v === 'number' && (v > 99999 || !isFinite(v)));
+  if (hasBad) console.warn('[Churrascômetro] Valor suspeito:', out);
+  const meatPerPersonKg = effectivePeople > 0 ? totalMeatKg / effectivePeople : 0;
+  if (effectivePeople <= 10 && meatPerPersonKg > SUSPICIOUS_MEAT_PER_PERSON_KG) {
+    console.warn('[Churrascômetro] Valor suspeito: carne por pessoa muito alta', { meatPerPersonKg, effectivePeople });
   }
 
   return {
-    totalMeatKg,
-    beerLiters,
-    sodaLiters,
-    charcoalKg,
-    iceKg,
-    meatBreakdown,
+    totalMeatKg: formatarNumero(totalMeatKg),
+    beerLiters: formatarNumero(beerLiters),
+    sodaLiters: formatarNumero(sodaLiters),
+    charcoalKg: formatarNumero(charcoalKg),
+    iceKg: formatarNumero(iceKg),
+    meatBreakdown: {
+      bovina: formatarNumero(meatBreakdown.bovina),
+      frango: formatarNumero(meatBreakdown.frango),
+      linguica: formatarNumero(meatBreakdown.linguica),
+    },
     shoppingList,
-    effectivePeople: round2(effectivePeople),
-    perPerson,
+    effectivePeople: formatarNumero(effectivePeople),
+    perPerson: {
+      meatG: formatarNumero(perPerson.meatG),
+      beerL: formatarNumero(perPerson.beerL),
+      sodaL: formatarNumero(perPerson.sodaL),
+      charcoalG: formatarNumero(perPerson.charcoalG),
+      iceG: formatarNumero(perPerson.iceG),
+    },
   };
 }
 

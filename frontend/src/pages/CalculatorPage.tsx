@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import type { AudienceType } from '../types/barbecue';
-import { calculateBarbecue, encodeShareData } from '../utils/calculator';
+import { calculateBarbecue, encodeShareData, validateBarbecueInput } from '../utils/calculator';
+import { limitarValor } from '../utils/formatarNumero';
 
 const AUDIENCE_OPTIONS: { value: AudienceType; label: string; desc: string }[] = [
   { value: 'leve', label: 'Leve', desc: 'Pouca fome, mais conversa' },
@@ -15,57 +16,73 @@ export function CalculatorPage() {
   const [error, setError] = useState('');
 
   const [form, setForm] = useState({
-    peopleCount: 10,
-    durationHours: 4,
+    durationHours: 0,
     audienceType: 'moderado' as AudienceType,
-    menCount: 5,
-    womenCount: 4,
-    childrenCount: 1,
+    menCount: 0,
+    womenCount: 0,
+    childrenCount: 0,
     includeAlcohol: true,
     name: '',
   });
+
+  const [limitExceededFields, setLimitExceededFields] = useState<Partial<Record<'menCount' | 'womenCount' | 'childrenCount', boolean>>>({});
+
+  const totalPessoas = useMemo(
+    () => form.menCount + form.womenCount + form.childrenCount,
+    [form.menCount, form.womenCount, form.childrenCount]
+  );
 
   const updateForm = (key: string, value: number | string | boolean) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     setError('');
   };
 
-  const updatePeopleField = (key: 'menCount' | 'womenCount' | 'childrenCount', value: number) => {
-    const capped = Math.max(0, Math.min(500, Math.floor(Number(value)) || 0));
-    setForm((prev) => {
-      const next = { ...prev, [key]: capped };
-      next.peopleCount = next.menCount + next.womenCount + next.childrenCount;
-      return next;
-    });
+  const updatePeopleField = (key: 'menCount' | 'womenCount' | 'childrenCount', value: unknown) => {
+    const raw = Number(value) || 0;
+    const capped = limitarValor(raw);
+    setForm((prev) => ({ ...prev, [key]: capped }));
+    setLimitExceededFields((prev) => ({ ...prev, [key]: raw > 5000 }));
     setError('');
   };
 
   const handleSubmit = (share = false) => {
     const input = {
-      peopleCount: Math.max(1, Math.min(1000, Math.floor(Number(form.peopleCount)) || 1)),
-      durationHours: Math.max(1, Math.min(24, Number(form.durationHours) || 4)),
+      peopleCount: totalPessoas,
+      durationHours: Number(form.durationHours) ?? 0,
       audienceType: form.audienceType,
-      menCount: Math.max(0, Math.min(500, Math.floor(Number(form.menCount)) || 0)),
-      womenCount: Math.max(0, Math.min(500, Math.floor(Number(form.womenCount)) || 0)),
-      childrenCount: Math.max(0, Math.min(500, Math.floor(Number(form.childrenCount)) || 0)),
+      menCount: limitarValor(form.menCount),
+      womenCount: limitarValor(form.womenCount),
+      childrenCount: limitarValor(form.childrenCount),
       includeAlcohol: Boolean(form.includeAlcohol),
     };
 
-    if (input.peopleCount < 1) {
-      setError('Informe pelo menos 1 pessoa');
+    const validation = validateBarbecueInput(input);
+    if (!validation.valid) {
+      setError(validation.error);
       return;
     }
 
     setLoading(true);
     setError('');
 
-    const result = calculateBarbecue(input);
+    const men = limitarValor(input.menCount);
+    const women = limitarValor(input.womenCount);
+    const children = limitarValor(input.childrenCount);
+    const sanitizedInput = {
+      ...input,
+      menCount: men,
+      womenCount: women,
+      childrenCount: children,
+      durationHours: Math.max(1, Math.min(24, Number(input.durationHours) || 1)),
+      peopleCount: men + women + children,
+    };
+    const result = calculateBarbecue(sanitizedInput);
     const shareUrl = share
       ? `${window.location.origin}/share/${encodeShareData({
           result,
           name: form.name || undefined,
-          peopleCount: input.peopleCount,
-          durationHours: input.durationHours,
+          peopleCount: sanitizedInput.peopleCount,
+          durationHours: sanitizedInput.durationHours,
         })}`
       : undefined;
 
@@ -90,59 +107,69 @@ export function CalculatorPage() {
             handleSubmit(false);
           }}
         >
-          {/* Número de pessoas */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Número de pessoas
-            </label>
-            <input
-              type="number"
-              min="0"
-              max="1000"
-              value={form.peopleCount}
-              onChange={(e) => {
-                const v = Math.max(0, Math.min(1000, Math.floor(Number(e.target.value)) || 0));
-                updateForm('peopleCount', v);
-              }}
-              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red focus:border-transparent"
-            />
-          </div>
-
-          {/* Detalhamento */}
+          {/* Categorias de pessoas - total calculado automaticamente */}
           <div className="grid grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Homens</label>
-            <input
-              type="number"
-              min="0"
-              max="500"
-              value={form.menCount}
-              onChange={(e) => updatePeopleField('menCount', Number(e.target.value))}
-              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red"
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Homens</label>
+              <input
+                type="number"
+                min="0"
+                max="5000"
+                step="1"
+                value={form.menCount}
+                onChange={(e) => updatePeopleField('menCount', e.target.value)}
+                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red"
+              />
+              {limitExceededFields.menCount && (
+                <p className="mt-1 text-sm text-amber-400">O limite máximo por categoria é 5.000 pessoas</p>
+              )}
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Mulheres</label>
               <input
                 type="number"
                 min="0"
-                max="500"
+                max="5000"
+                step="1"
                 value={form.womenCount}
-                onChange={(e) => updatePeopleField('womenCount', Number(e.target.value))}
+                onChange={(e) => updatePeopleField('womenCount', e.target.value)}
                 className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red"
               />
+              {limitExceededFields.womenCount && (
+                <p className="mt-1 text-sm text-amber-400">O limite máximo por categoria é 5.000 pessoas</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Crianças</label>
               <input
                 type="number"
                 min="0"
-                max="500"
+                max="5000"
+                step="1"
                 value={form.childrenCount}
-                onChange={(e) => updatePeopleField('childrenCount', Number(e.target.value))}
+                onChange={(e) => updatePeopleField('childrenCount', e.target.value)}
                 className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red"
               />
+              {limitExceededFields.childrenCount && (
+                <p className="mt-1 text-sm text-amber-400">O limite máximo por categoria é 5.000 pessoas</p>
+              )}
             </div>
+          </div>
+
+          {/* Total de pessoas - somente leitura */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Total de pessoas
+            </label>
+            <input
+              type="text"
+              value={totalPessoas}
+              readOnly
+              tabIndex={-1}
+              aria-readonly="true"
+              className="w-full px-4 py-3 bg-gray-800/30 border border-gray-700 rounded-lg text-gray-400 cursor-not-allowed"
+            />
+            <p className="text-xs text-gray-500 mt-1">Calculado automaticamente a partir das categorias acima</p>
           </div>
           <p className="text-xs text-gray-500">Crianças contam como 0,5 pessoa no cálculo</p>
 
@@ -153,12 +180,12 @@ export function CalculatorPage() {
             </label>
             <input
               type="number"
-              min="1"
+              min="0"
               max="24"
               step="0.5"
               value={form.durationHours}
               onChange={(e) => {
-                const v = Math.max(1, Math.min(24, Number(e.target.value) || 1));
+                const v = Math.max(0, Math.min(24, Number(e.target.value) || 0));
                 updateForm('durationHours', v);
               }}
               className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red"
