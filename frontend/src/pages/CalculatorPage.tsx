@@ -31,18 +31,19 @@ export function CalculatorPage() {
   };
 
   const syncPeopleCount = () => {
-    updateForm('peopleCount', form.menCount + form.womenCount + form.childrenCount);
+    const total = Number(form.menCount) + Number(form.womenCount) + Number(form.childrenCount);
+    updateForm('peopleCount', total);
   };
 
   const handleSubmit = (share = false) => {
     const input = {
-      peopleCount: form.peopleCount,
-      durationHours: form.durationHours,
+      peopleCount: Number(form.peopleCount) || 1,
+      durationHours: Number(form.durationHours) || 4,
       audienceType: form.audienceType,
-      menCount: form.menCount,
-      womenCount: form.womenCount,
-      childrenCount: form.childrenCount,
-      includeAlcohol: form.includeAlcohol,
+      menCount: Number(form.menCount) || 0,
+      womenCount: Number(form.womenCount) || 0,
+      childrenCount: Number(form.childrenCount) || 0,
+      includeAlcohol: Boolean(form.includeAlcohol),
     };
 
     if (input.peopleCount < 1) {
@@ -94,7 +95,7 @@ export function CalculatorPage() {
               min="1"
               max="500"
               value={form.peopleCount}
-              onChange={(e) => updateForm('peopleCount', parseInt(e.target.value) || 0)}
+              onChange={(e) => updateForm('peopleCount', Number(e.target.value) || 0)}
               className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red focus:border-transparent"
             />
           </div>
@@ -108,7 +109,7 @@ export function CalculatorPage() {
                 min="0"
                 value={form.menCount}
                 onChange={(e) => {
-                  updateForm('menCount', parseInt(e.target.value) || 0);
+                  updateForm('menCount', Number(e.target.value) || 0);
                   setTimeout(syncPeopleCount, 0);
                 }}
                 className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red"
@@ -121,7 +122,7 @@ export function CalculatorPage() {
                 min="0"
                 value={form.womenCount}
                 onChange={(e) => {
-                  updateForm('womenCount', parseInt(e.target.value) || 0);
+                  updateForm('womenCount', Number(e.target.value) || 0);
                   setTimeout(syncPeopleCount, 0);
                 }}
                 className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red"
@@ -134,7 +135,7 @@ export function CalculatorPage() {
                 min="0"
                 value={form.childrenCount}
                 onChange={(e) => {
-                  updateForm('childrenCount', parseInt(e.target.value) || 0);
+                  updateForm('childrenCount', Number(e.target.value) || 0);
                   setTimeout(syncPeopleCount, 0);
                 }}
                 className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red"
@@ -154,7 +155,7 @@ export function CalculatorPage() {
               max="24"
               step="0.5"
               value={form.durationHours}
-              onChange={(e) => updateForm('durationHours', parseFloat(e.target.value) || 1)}
+              onChange={(e) => updateForm('durationHours', Number(e.target.value) || 1)}
               className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-churrasco-red"
             />
             <p className="text-xs text-gray-500 mt-1">Churrascos &gt; 6h têm +20% de consumo</p>

@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { decodeShareData } from '../utils/calculator';
+import { formatarNumeroExibicao } from '../utils/formatarNumero';
 
 export function SharePage() {
   const { data } = useParams<{ data: string }>();
@@ -30,7 +31,7 @@ export function SharePage() {
 
         <h1 className="font-display text-4xl text-churrasco-red mb-2">Lista de compras</h1>
         <p className="text-gray-400 mb-8">
-          {decoded?.peopleCount ?? '-'} pessoas • {decoded?.durationHours ?? '-'}h de churrasco
+          {formatarNumeroExibicao(Number(decoded?.peopleCount))} pessoas • {formatarNumeroExibicao(Number(decoded?.durationHours))}h de churrasco
         </p>
 
         {result.perPerson && result.effectivePeople && (
@@ -44,50 +45,50 @@ export function SharePage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 text-sm">
               <div className="p-3 rounded-lg bg-gray-800/50">
                 <p className="text-gray-500 text-xs mb-1">Carne/pessoa</p>
-                <p className="font-medium text-churrasco-warm">{result.perPerson.meatG}g</p>
+                <p className="font-medium text-churrasco-warm">{formatarNumeroExibicao(result.perPerson.meatG)}g</p>
               </div>
               {result.perPerson.beerL > 0 && (
                 <div className="p-3 rounded-lg bg-gray-800/50">
                   <p className="text-gray-500 text-xs mb-1">Cerveja/adulto</p>
-                  <p className="font-medium text-churrasco-warm">{result.perPerson.beerL} L</p>
+                  <p className="font-medium text-churrasco-warm">{formatarNumeroExibicao(result.perPerson.beerL)} L</p>
                 </div>
               )}
               <div className="p-3 rounded-lg bg-gray-800/50">
                 <p className="text-gray-500 text-xs mb-1">Refrigerante/pessoa</p>
-                <p className="font-medium text-churrasco-warm">{result.perPerson.sodaL} L</p>
+                <p className="font-medium text-churrasco-warm">{formatarNumeroExibicao(result.perPerson.sodaL)} L</p>
               </div>
               <div className="p-3 rounded-lg bg-gray-800/50">
                 <p className="text-gray-500 text-xs mb-1">Carvão/pessoa</p>
-                <p className="font-medium text-churrasco-warm">{result.perPerson.charcoalG}g</p>
+                <p className="font-medium text-churrasco-warm">{formatarNumeroExibicao(result.perPerson.charcoalG)}g</p>
               </div>
               <div className="p-3 rounded-lg bg-gray-800/50">
                 <p className="text-gray-500 text-xs mb-1">Gelo/pessoa</p>
-                <p className="font-medium text-churrasco-warm">{result.perPerson.iceG}g</p>
+                <p className="font-medium text-churrasco-warm">{formatarNumeroExibicao(result.perPerson.iceG)}g</p>
               </div>
             </div>
             <p className="text-xs text-gray-500 mt-3">
-              {result.effectivePeople} {result.effectivePeople === 1 ? 'pessoa efetiva' : 'pessoas efetivas'}
+              {formatarNumeroExibicao(result.effectivePeople)} {result.effectivePeople === 1 ? 'pessoa efetiva' : 'pessoas efetivas'}
             </p>
           </div>
         )}
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-          <ResultCard icon="🥩" label="Carne" value={`${result.totalMeatKg} kg`} />
+          <ResultCard icon="🥩" label="Carne" value={`${formatarNumeroExibicao(result.totalMeatKg)} kg`} />
           {result.beerLiters > 0 && (
-            <ResultCard icon="🍺" label="Cerveja" value={`${result.beerLiters} L`} />
+            <ResultCard icon="🍺" label="Cerveja" value={`${formatarNumeroExibicao(result.beerLiters)} L`} />
           )}
-          <ResultCard icon="🥤" label="Refrigerante" value={`${result.sodaLiters} L`} />
-          <ResultCard icon="🔥" label="Carvão" value={`${result.charcoalKg} kg`} />
-          <ResultCard icon="🧊" label="Gelo" value={`${result.iceKg} kg`} />
+          <ResultCard icon="🥤" label="Refrigerante" value={`${formatarNumeroExibicao(result.sodaLiters)} L`} />
+          <ResultCard icon="🔥" label="Carvão" value={`${formatarNumeroExibicao(result.charcoalKg)} kg`} />
+          <ResultCard icon="🧊" label="Gelo" value={`${formatarNumeroExibicao(result.iceKg)} kg`} />
         </div>
 
         {result.meatBreakdown && (
           <div className="mb-8 p-6 rounded-xl bg-gray-800/30 border border-gray-700">
             <h2 className="font-semibold mb-4">Tipos de carne</h2>
             <div className="space-y-2">
-              <p>🥩 Bovina: {result.meatBreakdown.bovina} kg</p>
-              <p>🍗 Frango: {result.meatBreakdown.frango} kg</p>
-              <p>🌭 Linguiça: {result.meatBreakdown.linguica} kg</p>
+              <p>🥩 Bovina: {formatarNumeroExibicao(result.meatBreakdown.bovina)} kg</p>
+              <p>🍗 Frango: {formatarNumeroExibicao(result.meatBreakdown.frango)} kg</p>
+              <p>🌭 Linguiça: {formatarNumeroExibicao(result.meatBreakdown.linguica)} kg</p>
             </div>
           </div>
         )}
